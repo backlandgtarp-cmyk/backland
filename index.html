@@ -98,7 +98,17 @@ h2 em{font-family:var(--serif);font-style:italic;font-weight:500;color:#e7b9ff}
 .card{border:1px solid var(--line);border-radius:24px;background:var(--glass);padding:28px}
 .card .ico{margin-bottom:18px}
 .card h3{margin:0 0 8px;font-size:1.2rem}
+
 .card p{margin:0;color:var(--mute)}
+
+/* Équipe du staff : agrandissement fluide au survol */
+#staff .cards{overflow:visible;}
+#staff .cards .card{position:relative;transform:scale(1);transform-origin:center;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease;}
+@media (hover:hover) and (pointer:fine){
+  #staff .cards .card:hover{transform:scale(1.055);z-index:2;border-color:#b66bff;box-shadow:0 14px 38px #8a3dff30,0 0 0 1px #ff3fd822;}
+}
+@media (prefers-reduced-motion:reduce){#staff .cards .card{transition:none;}}
+
 .stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
 .stats div{border:1px solid var(--line);border-radius:999px;padding:10px 22px;color:var(--mute)}
 .stats b{color:var(--ink);margin-right:6px}
