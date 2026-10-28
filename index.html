@@ -148,6 +148,8 @@ body:not(.on-apply) #candidature{display:none}
 #applymsg.ok{color:#3dffb0}
 #applymsg.err{color:#ff7b8a}
 #applyform[hidden]{display:none}
+#applyform textarea.short{min-height:110px}
+#applyform input[readonly]{opacity:.75}
 .wall{max-width:640px;padding:28px;border:1px solid #8a3dff77;border-radius:22px;background:#8a3dff14}
 .wall h3{margin:0 0 8px;font-size:1.3rem}
 .wall p{margin:0 0 18px;color:var(--mute)}
@@ -430,8 +432,8 @@ footer .wrap{position:relative}
 <section id="candidature">
   <div class="wrap">
     <a class="link" href="#accueil" style="display:inline-block;margin-bottom:22px">← Retour à l’accueil</a>
-    <h2>Candidature <em>whitelist</em></h2>
-    <p class="lead">Remplis ce formulaire : ta candidature est envoyée directement au staff sur Discord.</p>
+    <h2>Questionnaire <em>whitelist</em></h2>
+    <p class="lead">Merci de répondre sérieusement à toutes les questions.</p>
     <div class="wall" id="applywall">
       <h3>Connexion requise</h3>
       <p>Pour déposer ta candidature, connecte-toi d’abord avec ton compte Discord. Le staff saura ainsi qui tu es.</p>
@@ -439,11 +441,15 @@ footer .wrap{position:relative}
       <p id="wallmsg" role="status"></p>
     </div>
     <form id="applyform" novalidate hidden>
-      <p class="who" id="applywho"></p>
-      <label>Nombre d’heures sur FiveM<input name="hours" type="number" min="0" max="100000" inputmode="numeric" required></label>
-      <label>Background de ton personnage<textarea name="background" maxlength="3000" placeholder="Raconte son histoire : d’où il vient, son caractère, ses objectifs en ville…" required></textarea><small id="bgcount">0 / 3000 · 100 caractères minimum</small></label>
+      <label>1. Quel est ton pseudo Discord ?<input id="applypseudo" name="pseudo" type="text" readonly></label>
+      <label>2. Quel est ton âge ?<input name="age" type="number" min="1" max="99" inputmode="numeric" required></label>
+      <label>3. Depuis combien de temps joues-tu à FiveM ?<input name="duration" type="text" maxlength="60" placeholder="Par exemple : 2 ans" required></label>
+      <label>4. Tu te fais braquer par trois personnes armées, comment réagis-tu ?<textarea class="short" name="robbery" maxlength="800" required></textarea></label>
+      <label>5. Tu as un accident de voiture grave, que fais-tu ?<textarea class="short" name="accident" maxlength="800" required></textarea></label>
+      <label>6. As-tu le droit de te venger après une mort RP ? Explique pourquoi.<textarea class="short" name="revenge" maxlength="800" required></textarea></label>
+      <label>7. Présente l’histoire de ton personnage et ses objectifs en ville.<textarea name="story" maxlength="2000" required></textarea><small id="bgcount">0 / 2000 · 100 caractères minimum</small></label>
       <input class="hp" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <button class="btn" type="submit">Envoyer ma candidature →</button>
+      <button class="btn" type="submit">Envoyer mes réponses →</button>
       <p id="applymsg" role="status"></p>
     </form>
   </div>
@@ -627,8 +633,8 @@ footer .wrap{position:relative}
   if(!token())user=null;
 
   var wall=document.getElementById('applywall'),wallBtn=document.getElementById('applylogin'),wallMsg=document.getElementById('wallmsg');
-  var f=document.getElementById('applyform'),who=document.getElementById('applywho'),msg=document.getElementById('applymsg');
-  var btn=f?f.querySelector('button[type=submit]'):null,bg=f?f.elements.background:null,cnt=document.getElementById('bgcount');
+  var f=document.getElementById('applyform'),pseudo=document.getElementById('applypseudo'),msg=document.getElementById('applymsg');
+  var btn=f?f.querySelector('button[type=submit]'):null,bg=f?f.elements.story:null,cnt=document.getElementById('bgcount');
   var nav=document.getElementById('navlogin'),navDefault=nav?nav.innerHTML:'';
   if(!f||!wall)return;
 
@@ -640,7 +646,7 @@ footer .wrap{position:relative}
     var logged=!!(token()&&user);
     wall.hidden=logged;
     f.hidden=!logged;
-    if(logged)who.textContent='Connecté avec Discord en tant que '+user.name;
+    if(logged)pseudo.value=user.name;
     if(nav&&DISCORD_CLIENT_ID){
       if(logged){
         nav.title='Se déconnecter';
@@ -688,7 +694,7 @@ footer .wrap{position:relative}
     setTimeout(function(){if(n.parentNode)n.parentNode.removeChild(n);},3500);
   }
   function say(t,ok){msg.textContent=t;msg.className=ok?'ok':'err';}
-  function count(){cnt.textContent=bg.value.length+' / 3000 · 100 caractères minimum';}
+  function count(){cnt.textContent=bg.value.length+' / 2000 · 100 caractères minimum';}
   bg.addEventListener('input',count);
   wallBtn.addEventListener('click',function(){startLogin('#candidature');});
   if(nav){
@@ -703,18 +709,22 @@ footer .wrap{position:relative}
     if(f.elements.website.value)return;
     var tok=token();
     if(!tok||!user){render();return;}
-    var h=parseInt(f.elements.hours.value,10),b=bg.value.trim();
-    if(isNaN(h)||h<0){say('Indique ton nombre d’heures sur FiveM.');return;}
-    if(b.length<100){say('Ton background est trop court (100 caractères minimum).');return;}
+    var el=f.elements;
+    var age=parseInt(el.age.value,10),dur=el.duration.value.trim();
+    var robbery=el.robbery.value.trim(),accident=el.accident.value.trim(),revenge=el.revenge.value.trim(),story=bg.value.trim();
+    if(isNaN(age)||age<1||age>99){say('Indique ton âge.');return;}
+    if(!dur){say('Indique depuis combien de temps tu joues à FiveM.');return;}
+    if(robbery.length<20||accident.length<20||revenge.length<20){say('Réponds à chaque question en quelques phrases (20 caractères minimum).');return;}
+    if(story.length<100){say('L’histoire de ton personnage est trop courte (100 caractères minimum).');return;}
     if(!APPLY_URL){say('L’envoi vers Discord n’est pas encore activé.');return;}
     btn.disabled=true;say('Envoi en cours…',true);
-    fetch(APPLY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok,hours:h,background:b})})
+    fetch(APPLY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok,age:age,duration:dur,robbery:robbery,accident:accident,revenge:revenge,story:story})})
       .then(function(r){
         if(r.status===401){logout();wallMsg.textContent='Ta connexion Discord a expiré. Reconnecte-toi.';render();throw new Error('auth');}
         if(!r.ok)throw new Error(String(r.status));
         return r.json();
       })
-      .then(function(){f.reset();count();say('Candidature envoyée. Merci !',true);})
+      .then(function(){f.reset();pseudo.value=user?user.name:'';count();say('Merci pour ta candidature ! Le staff étudiera tes réponses et te donnera une réponse sur Discord.',true);})
       .catch(function(err){if(!(err&&err.message==='auth'))say('Envoi impossible pour le moment. Réessaie plus tard ou contacte le staff sur Discord.');})
       .then(function(){btn.disabled=false;});
   });
