@@ -663,8 +663,9 @@ footer .wrap{position:relative}
   }
   function handleReturn(){
     var h=location.hash;
-    if(h.indexOf('#access_token=')!==0&&h.indexOf('#error=')!==0)return null;
+    if(h.length<2)return null;
     var p=new URLSearchParams(h.slice(1)),back=get(K.ret)||'#candidature';
+    if(!p.has('access_token')&&!p.has('error'))return null;
     try{history.replaceState(null,'',location.pathname+location.search+back);}catch(e){}
     var tok=p.get('access_token'),st=p.get('state');
     if(!tok||!st||st!==get(K.st)){wallMsg.textContent='Connexion annulée ou invalide. Réessaie.';return Promise.resolve();}
