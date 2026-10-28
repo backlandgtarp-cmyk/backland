@@ -438,10 +438,11 @@ footer .wrap{position:relative}
     <h2>Espace <em>staff</em></h2>
     <p class="lead">Cette page n’apparaît que pour les membres du staff connectés avec Discord.</p>
     <div class="cards">
-      <div class="card"><h3>Candidatures</h3><p>Les questionnaires de whitelist arrivent dans le salon Discord des candidatures, avec un ping du rôle.</p></div>
+      <div class="card"><h3>Historique des candidatures</h3><p>Consulte les candidatures reçues, leurs réponses et leur date d’envoi.</p><button class="btn" id="load-application-history" type="button" style="margin-top:18px">Charger l’historique ↻</button><p id="history-status" role="status" style="margin-top:14px">Clique sur « Charger l’historique » pour afficher les candidatures.</p></div>
       <a class="card" href="#reglement"><h3>Règlement</h3><p>Relis le règlement complet du serveur.</p><span class="more">Ouvrir →</span></a>
     </div>
-    <p class="note">Contenu à compléter.</p>
+    <div id="application-history" class="cards" aria-live="polite" style="margin-top:22px"></div>
+    <p class="note">L’historique nécessite que le relais Cloudflare des candidatures expose une route GET /history protégée et réservée au staff.</p>
   </div>
 </section>
 
@@ -765,6 +766,53 @@ footer .wrap{position:relative}
       .catch(function(err){if(!(err&&err.message==='auth'))say('Envoi impossible pour le moment. Réessaie plus tard ou contacte le staff sur Discord.');})
       .then(function(){btn.disabled=false;});
   });
+  // Historique staff : le relais doit vérifier le rôle staff côté serveur sur GET /history.
+  var historyBtn=document.getElementById('load-application-history');
+  var historyStatus=document.getElementById('history-status');
+  var historyContainer=document.getElementById('application-history');
+  function safeText(value){return value==null?'—':String(value);}
+  function historyField(label,value){
+    var wrap=document.createElement('div');
+    wrap.style.cssText='margin-top:10px';
+    var strong=document.createElement('strong');strong.textContent=label+': ';
+    var span=document.createElement('span');span.textContent=safeText(value);
+    wrap.appendChild(strong);wrap.appendChild(span);return wrap;
+  }
+  function loadApplicationHistory(){
+    if(!user||!user.staff||!token()){historyStatus.textContent='Connecte-toi avec un compte Discord ayant le rôle staff.';return;}
+    historyBtn.disabled=true;historyStatus.textContent='Chargement de l’historique…';historyContainer.replaceChildren();
+    fetch(APPLY_URL+'/history',{method:'GET',headers:{Authorization:'Bearer '+token()}})
+      .then(function(r){
+        if(r.status===401||r.status===403)throw new Error('permission');
+        if(r.status===404||r.status===405)throw new Error('endpoint');
+        if(!r.ok)throw new Error('network');
+        return r.json();
+      })
+      .then(function(data){
+        var applications=Array.isArray(data)?data:(data&&Array.isArray(data.applications)?data.applications:null);
+        if(!applications)throw new Error('format');
+        if(!applications.length){historyStatus.textContent='Aucune candidature dans l’historique.';return;}
+        historyStatus.textContent=applications.length+' candidature(s) trouvée(s).';
+        applications.forEach(function(app,index){
+          var card=document.createElement('article');card.className='card';
+          var title=document.createElement('h3');title.textContent=safeText(app.pseudo||app.username||app.name||('Candidature #'+(index+1)));card.appendChild(title);
+          card.appendChild(historyField('Date',app.createdAt||app.created_at||app.date));
+          card.appendChild(historyField('Âge',app.age));
+          card.appendChild(historyField('Expérience FiveM',app.duration));
+          card.appendChild(historyField('Braquage',app.robbery));
+          card.appendChild(historyField('Accident',app.accident));
+          card.appendChild(historyField('Vengeance après une mort RP',app.revenge));
+          card.appendChild(historyField('Histoire du personnage',app.story));
+          historyContainer.appendChild(card);
+        });
+      })
+      .catch(function(err){
+        historyStatus.textContent=err.message==='permission'?'Accès refusé : le compte doit avoir le rôle staff.':err.message==='endpoint'?'Le relais Cloudflare ne propose pas encore GET /history. Il faut ajouter cette route pour récupérer les candidatures enregistrées.':'Impossible de charger l’historique. Vérifie la connexion au relais Cloudflare.';
+      })
+      .then(function(){historyBtn.disabled=false;});
+  }
+  if(historyBtn)historyBtn.addEventListener('click',loadApplicationHistory);
+
   var back=handleReturn();
   if(back){back.then(function(){render();window.dispatchEvent(new Event('hashchange'));});}
   else{render();}
