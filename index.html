@@ -249,6 +249,25 @@ footer .wrap{position:relative}
   .cta.hide{display:none}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}summary::after{transition:none}}
+.stf-h{margin:44px 0 6px;font-size:1.4rem}
+.stf-p{margin:0 0 16px;color:var(--mute)}
+.tpls{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.tpl{padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--glass)}
+.tpl-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.tpl pre{margin:0;white-space:pre-wrap;word-break:break-word;font:400 .92rem/1.55 var(--sans);color:var(--mute);-webkit-user-select:text;user-select:text}
+.copy{border:1px solid #8a3dff88;border-radius:999px;background:#8a3dff1a;color:var(--ink);font:600 .85rem var(--sans);padding:6px 14px;cursor:pointer;white-space:nowrap}
+.copy:hover{background:#8a3dff55}
+.copy.done{border-color:#3dffb0;color:#3dffb0}
+.tool{max-width:640px;display:flex;flex-direction:column;gap:14px;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--glass)}
+.tool label{display:flex;flex-direction:column;gap:8px;font-weight:600}
+.tool select{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#10081f;color:var(--ink);font:400 1rem var(--sans)}
+.tool .copy{align-self:flex-start}
+.res{padding:14px 16px;border-radius:12px;background:#8a3dff1a;line-height:1.6}
+.qs{margin:0;padding-left:20px;color:var(--mute)}
+.qs li{margin-bottom:6px}
+.tool .chk{flex-direction:row;align-items:center;gap:10px;font-weight:500}
+.tool .chk input{width:18px;height:18px;accent-color:#8a3dff}
+.score{font-weight:600}
 </style>
 </head>
 <body>
@@ -449,6 +468,46 @@ footer .wrap{position:relative}
     <p class="lead">Cette page n’apparaît que pour les membres du staff connectés avec Discord.</p>
     <div class="cards">
       <a class="card" href="#reglement"><h3>Règlement</h3><p>Relis le règlement complet du serveur.</p><span class="more">Ouvrir →</span></a>
+    </div>
+    <h3 class="stf-h">Modèles de messages</h3>
+    <p class="stf-p">Clique sur « Copier », colle dans Discord, puis remplace ce qui est entre crochets.</p>
+    <div class="tpls"><div class="tpl"><div class="tpl-top"><strong>Whitelist acceptée</strong><button class="copy" type="button">Copier</button></div><pre>Bonjour [pseudo],
+
+Félicitations, ta candidature a été acceptée ! Tu peux dès maintenant te connecter à Backland et créer ton personnage.
+
+N’oublie pas de relire le règlement avant de jouer. Bon jeu !</pre></div><div class="tpl"><div class="tpl-top"><strong>Whitelist refusée</strong><button class="copy" type="button">Copier</button></div><pre>Bonjour [pseudo],
+
+Merci pour ta candidature. Après étude de tes réponses, nous ne pouvons pas la valider pour le moment : [raison].
+
+Tu pourras postuler de nouveau dans [délai]. Merci de ton intérêt pour Backland.</pre></div><div class="tpl"><div class="tpl-top"><strong>Convocation à l’entretien vocal</strong><button class="copy" type="button">Copier</button></div><pre>Bonjour [pseudo],
+
+Ta candidature a retenu notre attention. Un court entretien vocal est nécessaire pour la valider.
+
+Quand es-tu disponible cette semaine ? Rejoins le salon vocal [salon] à l’heure convenue.</pre></div><div class="tpl"><div class="tpl-top"><strong>Avertissement</strong><button class="copy" type="button">Copier</button></div><pre>Bonjour [pseudo],
+
+Un avertissement t’est attribué pour [infraction] (article [numéro] du règlement). Merci de respecter les règles.
+
+Si tu souhaites contester, ouvre un ticket sur le Discord, calmement et avec des preuves.</pre></div><div class="tpl"><div class="tpl-top"><strong>Sanction (bannissement)</strong><button class="copy" type="button">Copier</button></div><pre>Bonjour [pseudo],
+
+Tu es sanctionné d’un bannissement de [durée] pour [infraction] (article [numéro] du règlement).
+
+Pour contester, ouvre un ticket sur le Discord après la situation, avec tes preuves (article 14).</pre></div><div class="tpl"><div class="tpl-top"><strong>Accusé de réception d’un ticket</strong><button class="copy" type="button">Copier</button></div><pre>Bonjour [pseudo],
+
+Nous avons bien reçu ton ticket. Un membre du staff va l’étudier et te répondre rapidement. Merci de ta patience.</pre></div></div>
+    <h3 class="stf-h">Barème des sanctions</h3>
+    <p class="stf-p">Barème indicatif (article 13) : la sanction dépend de la gravité, de la récidive et de l’attitude du joueur.</p>
+    <div class="tool">
+      <label>Infraction<select id="sanc"></select></label>
+      <div class="res" id="sancres" aria-live="polite"></div>
+      <button class="copy" type="button" id="sanccopy">Copier le message</button>
+    </div>
+    <h3 class="stf-h">Grille d’entretien whitelist</h3>
+    <p class="stf-p">Quelques questions à poser à l’oral, et des critères à cocher.</p>
+    <div class="tool">
+      <ol class="qs"><li>Présente ton personnage en une minute.</li><li>Que fais-tu si trois personnes armées te braquent ? (Fear RP)</li><li>Qu’est-ce que le metagaming ? Donne un exemple.</li><li>As-tu le droit de te venger après une mort RP ? (NLR)</li><li>Que fais-tu si tu découvres un bug ?</li></ol>
+      <div id="crit"><label class="chk"><input type="checkbox"> Personnage cohérent et original</label><label class="chk"><input type="checkbox"> Connaît le lexique RP (HRP, RDM, VDM, MG, PG)</label><label class="chk"><input type="checkbox"> Joue la peur et la douleur (Fear RP, Pain RP)</label><label class="chk"><input type="checkbox"> Attitude respectueuse et calme</label><label class="chk"><input type="checkbox"> Micro correct, s’exprime clairement</label></div>
+      <p class="score" id="score">0 / 5 critères validés</p>
+      <p class="stf-p" style="margin:0">La grille t’aide, mais la décision reste la tienne.</p>
     </div>
   </div>
 </section>
@@ -776,6 +835,54 @@ footer .wrap{position:relative}
   var back=handleReturn();
   if(back){back.then(function(){render();window.dispatchEvent(new Event('hashchange'));});}
   else{render();}
+})();
+</script>
+<script>
+(function(){
+  function copy(text,btn){
+    function ok(){var old=btn.textContent;btn.textContent='Copié';btn.classList.add('done');setTimeout(function(){btn.textContent=old;btn.classList.remove('done');},1500);}
+    function fallback(){
+      var ta=document.createElement('textarea');
+      ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.select();
+      try{document.execCommand('copy');ok();}catch(e){}
+      document.body.removeChild(ta);
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(ok).catch(fallback);}else{fallback();}
+  }
+  document.querySelectorAll('.tpl .copy').forEach(function(b){
+    b.addEventListener('click',function(){copy(b.closest('.tpl').querySelector('pre').textContent,b);});
+  });
+  var data=[
+    ['Fail RP / Powergaming','Avertissement','3.8, 3.9'],
+    ['Metagaming','Avertissement ou ban 24 h','3.7'],
+    ['RDM / VDM','Ban de 24 h à 3 jours','4.1, 8.2'],
+    ['Combat logging','Ban de 3 à 7 jours','4.8'],
+    ['Insultes / harcèlement','Ban de 7 jours à définitif','3.1'],
+    ['Cheat / contournement de ban','Ban définitif','12.1, 12.4']
+  ];
+  var sel=document.getElementById('sanc'),res=document.getElementById('sancres'),cb=document.getElementById('sanccopy');
+  if(sel&&res&&cb){
+    data.forEach(function(d,i){var o=document.createElement('option');o.value=String(i);o.textContent=d[0];sel.appendChild(o);});
+    var line='';
+    function show(){
+      var d=data[parseInt(sel.value,10)||0];
+      res.innerHTML='<b>Sanction indicative :</b> <span></span><br><b>Article(s) :</b> <span></span>';
+      var sp=res.querySelectorAll('span');
+      sp[0].textContent=d[1];sp[1].textContent=d[2];
+      line='Sanction : '+d[1]+' pour '+d[0]+' (article '+d[2]+' du règlement). Pour contester, ouvre un ticket sur le Discord avec tes preuves (article 14).';
+    }
+    sel.addEventListener('change',show);
+    cb.addEventListener('click',function(){copy(line,cb);});
+    show();
+  }
+  var crit=document.getElementById('crit'),score=document.getElementById('score');
+  if(crit&&score){
+    crit.addEventListener('change',function(){
+      var n=crit.querySelectorAll('input:checked').length;
+      score.textContent=n+' / 5 critères validés';
+    });
+  }
 })();
 </script>
 </body>
