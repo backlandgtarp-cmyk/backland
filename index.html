@@ -825,11 +825,12 @@ Nous avons bien reçu ton ticket. Un membre du staff va l’étudier et te répo
     fetch(APPLY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok,age:age,duration:dur,robbery:robbery,accident:accident,revenge:revenge,story:story})})
       .then(function(r){
         if(r.status===401){logout();wallMsg.textContent='Ta connexion Discord a expiré. Reconnecte-toi.';render();throw new Error('auth');}
+        if(r.status===409){say('Tu as déjà une candidature en cours : regarde ton salon privé sur Discord.');throw new Error('dup');}
         if(!r.ok)throw new Error(String(r.status));
         return r.json();
       })
-      .then(function(){f.reset();pseudo.value=user?user.name:'';count();say('Merci pour ta candidature ! Le staff étudiera tes réponses et te donnera une réponse sur Discord.',true);})
-      .catch(function(err){if(!(err&&err.message==='auth'))say('Envoi impossible pour le moment. Réessaie plus tard ou contacte le staff sur Discord.');})
+      .then(function(d){f.reset();pseudo.value=user?user.name:'';count();say(d&&d.channel?'Merci pour ta candidature ! Un salon privé vient de s’ouvrir sur Discord : le staff te répondra là-bas.':'Merci pour ta candidature ! Le staff étudiera tes réponses et te donnera une réponse sur Discord.',true);})
+      .catch(function(err){if(!(err&&(err.message==='auth'||err.message==='dup')))say('Envoi impossible pour le moment. Réessaie plus tard ou contacte le staff sur Discord.');})
       .then(function(){btn.disabled=false;});
   });
   var back=handleReturn();
