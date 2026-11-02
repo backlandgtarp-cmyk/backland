@@ -275,6 +275,12 @@ a.lk:hover{border-color:#8a3dffaa;background:#ffffff12}
 .lk b{display:block;margin-bottom:2px}
 .lk span{color:var(--mute);font-size:.9rem}
 .lk.off{opacity:.55;border-style:dashed}
+
+.secret-voice-wrap{display:inline-flex;align-items:center;margin-top:5px}
+.secret-voice{width:22px;height:22px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--mute);opacity:.42;font-size:14px;line-height:1;cursor:pointer;box-shadow:none}
+.secret-voice:hover,.secret-voice:focus-visible{opacity:1;color:#c58aff;outline:1px solid #8a3dff88;outline-offset:2px}
+.secret-voice-wrap small{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+#applyform input[name="secretCode"]{max-width:100%}
 </style>
 </head>
 <body>
@@ -303,7 +309,7 @@ a.lk:hover{border-color:#8a3dffaa;background:#ffffff12}
       <div class="tag"><i></i> Saison 1 · Whitelist ouverte</div>
       <h1>Vivre chaque nuit<br>à Los Santos, <em>à votre façon.</em></h1>
       <p class="sub">Un serveur GTA RP francophone fait pour les histoires : des métiers, des factions et un staff à l’écoute. Créez votre personnage et rejoignez la ville.</p>
-
+      <div class="secret-voice-wrap"><button class="secret-voice" id="secretVoiceBtn" type="button" aria-label="Écouter le message" title="Écouter">♪</button><small id="secretVoiceStatus" role="status" aria-live="polite"></small></div>
     </div>
 
     <aside class="panel" aria-label="Infos du serveur">
@@ -536,6 +542,7 @@ Nous avons bien reçu ton ticket. Un membre du staff va l’étudier et te répo
       <label>5. Tu as un accident de voiture grave, que fais-tu ?<textarea class="short" name="accident" maxlength="800" required></textarea></label>
       <label>6. As-tu le droit de te venger après une mort RP ? Explique pourquoi.<textarea class="short" name="revenge" maxlength="800" required></textarea></label>
       <label>7. Présente l’histoire de ton personnage et ses objectifs en ville.<textarea name="story" maxlength="2000" required></textarea><small id="bgcount">0 / 2000 · 100 caractères minimum</small></label>
+      <label>8. Quel code secret était donné dans le message vocal caché sur le site ?<input name="secretCode" type="text" maxlength="40" placeholder="Écris le code secret ici" autocomplete="off" required><small>Indice : un détail discret du site pourrait t'aider…</small></label>
       <input class="hp" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button class="btn" type="submit">Envoyer mes réponses →</button>
       <p id="applymsg" role="status"></p>
@@ -820,14 +827,15 @@ Nous avons bien reçu ton ticket. Un membre du staff va l’étudier et te répo
     if(!tok||!user){render();return;}
     var el=f.elements;
     var age=parseInt(el.age.value,10),dur=el.duration.value.trim();
-    var robbery=el.robbery.value.trim(),accident=el.accident.value.trim(),revenge=el.revenge.value.trim(),story=bg.value.trim();
+    var robbery=el.robbery.value.trim(),accident=el.accident.value.trim(),revenge=el.revenge.value.trim(),story=bg.value.trim(),secretCode=el.secretCode.value.trim();
     if(isNaN(age)||age<1||age>99){say('Indique ton âge.');return;}
     if(!dur){say('Indique depuis combien de temps tu joues à FiveM.');return;}
     if(robbery.length<20||accident.length<20||revenge.length<20){say('Réponds à chaque question en quelques phrases (20 caractères minimum).');return;}
     if(story.length<100){say('L’histoire de ton personnage est trop courte (100 caractères minimum).');return;}
+    if(secretCode.replace(/\s+/g,'').toUpperCase()!=='BANANE77'){say('Mauvais code secret ! Retourne écouter le message vocal sur la page d’accueil.');return;}
     if(!APPLY_URL){say('L’envoi vers Discord n’est pas encore activé.');return;}
     btn.disabled=true;say('Envoi en cours…',true);
-    fetch(APPLY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok,age:age,duration:dur,robbery:robbery,accident:accident,revenge:revenge,story:story})})
+    fetch(APPLY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok,age:age,duration:dur,robbery:robbery,accident:accident,revenge:revenge,story:story,secretCode:secretCode})})
       .then(function(r){
         if(r.status===401){logout();wallMsg.textContent='Ta connexion Discord a expiré. Reconnecte-toi.';render();throw new Error('auth');}
         if(r.status===409){say('Tu as déjà une candidature en cours : regarde ton salon privé sur Discord.');throw new Error('dup');}
@@ -892,5 +900,29 @@ Nous avons bien reçu ton ticket. Un membre du staff va l’étudier et te répo
 })();
 </script>
 
+
+<script>
+(function(){
+  var button=document.getElementById('secretVoiceBtn');
+  var status=document.getElementById('secretVoiceStatus');
+  if(!button)return;
+  button.addEventListener('click',function(){
+    if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){
+      status.textContent='La lecture vocale n’est pas disponible sur ce navigateur. Essaie avec Chrome.';
+      return;
+    }
+    window.speechSynthesis.cancel();
+    var message=new SpeechSynthesisUtterance('Yo, bienvenue sur Backland ! Si tu entends ce message, c’est que tu as bien fouillé le site. Retiens bien ce que je vais te dire : le code secret, c’est BANANE 77. Bonne chance pour ta candidature, et ne fais pas le malin !');
+    message.lang='fr-FR';message.rate=0.96;message.pitch=1.02;
+    var voices=window.speechSynthesis.getVoices();
+    var french=voices.find(function(v){return /^fr([-_]|$)/i.test(v.lang);});
+    if(french)message.voice=french;
+    message.onstart=function(){status.textContent='Lecture du message secret… écoute bien 👀';};
+    message.onend=function(){status.textContent='Tu as entendu le code ? Garde-le pour le questionnaire 😉';};
+    message.onerror=function(){status.textContent='Impossible de lire le vocal. Réessaie.';};
+    window.speechSynthesis.speak(message);
+  });
+})();
+</script>
 </body>
 </html>
