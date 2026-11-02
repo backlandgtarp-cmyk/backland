@@ -476,16 +476,6 @@ a.lk:hover{border-color:#8a3dffaa;background:#ffffff12}
     <div class="cards">
       <a class="card" href="#reglement"><h3>Règlement</h3><p>Relis le règlement complet du serveur.</p><span class="more">Ouvrir →</span></a>
     </div>
-    <h3 class="stf-h">Annuaire du staff</h3>
-    <p class="stf-p">Qui contacter selon le besoin.</p>
-    <div class="cards">
-      <div class="card"><span class="role">Fondateur</span><h3>Baptouuu</h3><p>Pilote le serveur et prend les décisions finales.</p><p class="ct">Discord : @baptouuu</p></div>
-      <div class="card"><span class="role">Co-fondateur</span><h3>traqueur_obscur</h3><p>Seconde la direction et coordonne l’équipe.</p><p class="ct">Discord : @traqueur_obscur</p></div>
-      <div class="card"><span class="role">Co-fondateur</span><h3>Pro_kut</h3><p>Seconde la direction et coordonne l’équipe.</p><p class="ct">Discord : @Pro_kut</p></div>
-    </div>
-    <p class="stf-p" style="margin-top:12px">Modérateurs et support : à ajouter quand ils rejoignent l’équipe.</p>
-    <h3 class="stf-h">Liens rapides</h3>
-    <div class="links" id="stafflinks"></div>
     <h3 class="stf-h">Modèles de messages</h3>
     <p class="stf-p">Clique sur « Copier », colle dans Discord, puis remplace ce qui est entre crochets.</p>
     <div class="tpls"><div class="tpl"><div class="tpl-top"><strong>Whitelist acceptée</strong><button class="copy" type="button">Copier</button></div><pre>Bonjour [pseudo],
@@ -903,30 +893,6 @@ Nous avons bien reçu ton ticket. Un membre du staff va l’étudier et te répo
   }
 })();
 </script>
-<script>
-(function(){
-  // Liens rapides du staff : renseigne l'adresse (u) de chaque ligne. Sans adresse, la ligne reste grisée.
-  var LINKS=[
-    {t:'Dépôt GitHub du site',d:'Direction : modifier et mettre à jour le site.',u:'https://github.com/backlandgtarp-cmyk/backland'},
-    {t:'Cloudflare',d:'Direction : relais des candidatures, variables et journaux.',u:'https://dash.cloudflare.com'},
-    {t:'Portail développeur Discord',d:'Direction : application, bot et clé publique.',u:'https://discord.com/developers/applications'},
-    {t:'Salon des tickets',d:'Lien à ajouter.',u:''},
-    {t:'Salon des annonces',d:'Lien à ajouter.',u:''},
-    {t:'txAdmin',d:'Lien à ajouter.',u:''},
-    {t:'Boutique Tebex',d:'Lien à ajouter.',u:''}
-  ];
-  var box=document.getElementById('stafflinks');
-  if(!box)return;
-  LINKS.forEach(function(l){
-    var el=document.createElement(l.u?'a':'div');
-    el.className='lk'+(l.u?'':' off');
-    if(l.u){el.href=l.u;el.target='_blank';el.rel='noopener';}
-    var b=document.createElement('b'),s=document.createElement('span');
-    b.textContent=l.t;s.textContent=l.d;
-    el.appendChild(b);el.appendChild(s);
-    box.appendChild(el);
-  });
-})();
-</script>
+
 </body>
 </html>
